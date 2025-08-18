@@ -1,3 +1,5 @@
+from random import randint
+
 import pygame
 import sys
 
@@ -11,6 +13,23 @@ def display_score():
     return current_time
 
 
+def obstacle_movement(obstacle_list):
+    if obstacle_list:
+        for rect in obstacle_list:
+            rect.x -= 5
+            screen.blit(snail_surf, rect)
+        return obstacle_list
+    else:
+        return []
+
+
+def obstacle_collision(obstacle_list):
+    for rect in obstacle_list:
+        if rect.colliderect(player_rect):
+            return True
+    return False
+
+
 pygame.init()
 screen = pygame.display.set_mode((800, 400))
 pygame.display.set_caption('Runner')
@@ -18,12 +37,15 @@ clock = pygame.time.Clock()
 game_active = False
 start_time = 0
 score = 0
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 1500)
 
 sky_surf = pygame.image.load('graphics/Sky.png').convert()
 ground_surf = pygame.image.load('graphics/ground.png').convert()
 
+# Obstacle
 snail_surf = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
-snail_rect = snail_surf.get_rect(bottomleft = (800, 300))
+obstacle_rect_list = []
 
 player_surf = pygame.image.load('graphics/Player/player_walk_1.png').convert_alpha()
 player_rect = player_surf.get_rect(bottomleft = (60, 300))
@@ -49,9 +71,12 @@ while True:
                     player_gravity = -20
         else:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                snail_rect.left = 800
+                obstacle_rect_list = 0
                 game_active = True
                 start_time = int(pygame.time.get_ticks() / 1000)
+
+        if event.type == obstacle_timer and game_active:
+            obstacle_rect_list.append(snail_surf.get_rect(bottomright = (randint(900, 1100), 300)))
 
     if game_active:
         # Blit background
@@ -61,20 +86,19 @@ while True:
         # Blit score
         score = display_score()
 
-        # Move and blit snail
-        snail_rect.x -= 4
-        if snail_rect.right <= 0: snail_rect.left = 800
-        screen.blit(snail_surf, snail_rect)
+        # Move
+        obstacle_rect_list = obstacle_movement(obstacle_rect_list)
 
         # Player update
         player_gravity += 1
         player_rect.y += player_gravity
-        if player_rect.bottom >= 300: player_rect.bottom = 300
+        if player_rect.bottom >= 300:
+            player_rect.bottom = 300
         screen.blit(player_surf, player_rect)
 
-        # Check game over
-        if snail_rect.colliderect(player_rect):
-            game_active = False
+        # Check collisions
+        game_active = not obstacle_collision(obstacle_rect_list)
+
     else:
         screen.fill((94, 129, 162))
 
