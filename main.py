@@ -3,7 +3,6 @@ from random import randint
 import pygame
 import sys
 
-
 def display_score():
     current_time = int(pygame.time.get_ticks() / 1000) - start_time
     score_font = pygame.font.Font('font/Pixeltype.ttf', 40)
