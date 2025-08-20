@@ -91,12 +91,11 @@ def display_score():
     return current_time
 
 
-# def collisions(player, obstacle_list):
-#     if obstacle_list:
-#         for rect in obstacle_list:
-#             if rect.colliderect(player):
-#                 return True
-#     return False
+def collision_sprite():
+    if pygame.sprite.spritecollide(player.sprite, obstacle_group, False):
+        obstacle_group.empty()
+        return True
+    return False
 
 
 pygame.init()
@@ -152,7 +151,7 @@ while True:
         obstacle_group.update()
 
         # Check collisions
-        #game_active = not collisions(player_rect, obstacle_rect_list)
+        game_active = not collision_sprite()
 
     else:
         screen.fill((94, 129, 162))
